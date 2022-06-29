@@ -26,11 +26,17 @@ export class Mattermost extends IncomingWebhook {
     username: string,
     icon_emoji: string
   ): IncomingWebhookSendArguments {
+    let text = `${msg}`;
+
     const tag = this.getTag();
-    let text = `${msg} (release ${tag})`;
+    if (tag) {
+      text += ` (release ${tag})`;
+    } else {
+      text += ` (branch ${this.getBranch()})`;
+    }
 
     if (status !== Status.Success) {
-      text = `(!) Failed: ${text}`;
+      text = `(!!!) Failed: ${text}`;
     }
 
     const payload: IncomingWebhookSendArguments = {
@@ -52,6 +58,16 @@ export class Mattermost extends IncomingWebhook {
     }
 
     return ref.replace(/^refs\/tags\//, '');
+  }
+
+  protected getBranch(): string {
+    const ref = github.context.ref;
+
+    if (!ref.startsWith('refs/heads/')) {
+      return '';
+    }
+
+    return ref.replace(/^refs\/heads\//, '');
   }
 
   /**
