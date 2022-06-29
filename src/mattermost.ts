@@ -13,7 +13,12 @@ export class Mattermost extends IncomingWebhook {
   static readonly mark: string[] = [':x:', ':white_check_mark:', ':warning:'];
   static readonly msg: string[] = ['Failure', 'Success', 'Cancel'];
 
-  constructor(url: string, username: string, icon_emoji: string) {
+  constructor(
+    url: string,
+    username: string,
+    icon_emoji: string,
+    private show_ref: boolean
+  ) {
     super(url, {username, icon_emoji});
   }
 
@@ -28,11 +33,13 @@ export class Mattermost extends IncomingWebhook {
   ): IncomingWebhookSendArguments {
     let text = `${msg}`;
 
-    const tag = this.getTag();
-    if (tag) {
-      text += ` (release ${tag})`;
-    } else {
-      text += ` (branch ${this.getBranch()})`;
+    if (this.show_ref) {
+      const tag = this.getTag();
+      if (tag) {
+        text += ` (release ${tag})`;
+      } else {
+        text += ` (branch ${this.getBranch()})`;
+      }
     }
 
     if (status !== Status.Success) {

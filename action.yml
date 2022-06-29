@@ -8,6 +8,10 @@ inputs:
   msg:
     description: 'Custom message to send to MM'
     required: true
+  show_ref:
+    description: 'Custom message to send to MM'
+    required: false
+    default: 'false'
   username:
     description: 'mattermost username'
     required: false
