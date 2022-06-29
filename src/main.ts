@@ -1,14 +1,14 @@
 import * as core from '@actions/core';
-import {Slack} from './slack';
+import {Mattermost} from './mattermost';
 import {Status, getStatus} from './utils';
 
 async function run() {
   try {
     const type: string = core.getInput('type', {required: true});
-    const job_name: string = core.getInput('job_name', {required: true});
+    const msg: string = core.getInput('msg') || 'Default message';
     const username: string = core.getInput('username') || 'Github Actions';
     const icon_emoji: string = core.getInput('icon_emoji') || 'octocat';
-    const channel: string = core.getInput('channel');
+    const channelsRaw: string = core.getInput('channels', {required: true});
     const url: string = core.getInput('url') || process.env.SLACK_WEBHOOK || '';
 
     if (url === '') {
@@ -20,13 +20,18 @@ async function run() {
     }
 
     const status: Status = getStatus(type);
-    const slack = new Slack(url, username, icon_emoji, channel);
-    const result = await slack.notify(status, job_name, username, icon_emoji);
+    const mm = new Mattermost(url, username, icon_emoji);
+    const channels: string[] = JSON.parse(channelsRaw);
 
+    const result = await mm.notify(status, msg, channels, username, icon_emoji);
     core.debug(`Response from Slack: ${JSON.stringify(result)}`);
   } catch (err) {
     console.log(err);
-    core.setFailed(err.message);
+    if (err instanceof Error) {
+      core.setFailed(err.message);
+    } else {
+      core.setFailed('Action Matterfy failed');
+    }
   }
 }
 
