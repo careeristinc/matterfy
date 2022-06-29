@@ -8,7 +8,7 @@ async function run() {
     const msg: string = core.getInput('msg') || 'Default message';
     const username: string = core.getInput('username') || 'Github Actions';
     const icon_emoji: string = core.getInput('icon_emoji') || 'octocat';
-    const channelsRaw: string = core.getInput('channels');
+    const channelsRaw: string = core.getInput('channels', {required: true});
     const url: string = core.getInput('url') || process.env.SLACK_WEBHOOK || '';
 
     if (url === '') {

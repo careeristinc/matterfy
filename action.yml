@@ -5,8 +5,8 @@ inputs:
   type:
     description: 'job status (success or failure)'
     required: true
-  job_name:
-    description: 'job name of workflow (format: markdown)'
+  msg:
+    description: 'Custom message to send to MM'
     required: true
   username:
     description: 'mattermost username'
@@ -16,9 +16,9 @@ inputs:
     description: 'mattermost icon emoji'
     required: false
     default: 'github'
-  channel:
-    description: 'mattermost channel'
-    required: false
+  channels:
+    description: 'mattermost channels (JSON string[])'
+    required: true
   url:
     description: 'mattermost incoming webhook url'
     required: false
