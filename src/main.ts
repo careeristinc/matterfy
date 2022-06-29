@@ -26,7 +26,11 @@ async function run() {
     core.debug(`Response from Slack: ${JSON.stringify(result)}`);
   } catch (err) {
     console.log(err);
-    core.setFailed(err.message);
+    if (err instanceof Error) {
+      core.setFailed(err.message);
+    } else {
+      core.setFailed('Action Matterfy failed')
+    }
   }
 }
 
