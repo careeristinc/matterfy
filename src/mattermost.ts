@@ -7,7 +7,7 @@ import {
   IncomingWebhookResult
 } from '@slack/webhook';
 
-export class Slack extends IncomingWebhook {
+export class Mattermost extends IncomingWebhook {
   // 0: failure, 1: success, 2: cancel
   static readonly color: string[] = ['#cb2431', '#2cbe4e', '#ffc107'];
   static readonly mark: string[] = [':x:', ':white_check_mark:', ':warning:'];
@@ -17,33 +17,8 @@ export class Slack extends IncomingWebhook {
     url: string,
     username: string,
     icon_emoji: string,
-    channel: string
   ) {
-    super(url, {username, icon_emoji, channel});
-  }
-
-  /**
-   * Get mattermost fields
-   */
-  protected get fields(): Object {
-    const context = github.context;
-    const {sha, eventName, workflow, ref} = context;
-    const {owner, repo} = context.repo;
-    const repo_url: string = `https://github.com/${owner}/${repo}`;
-    const action_url: string = `${repo_url}/commit/${sha}/checks`;
-
-    const fields: Array<Object> = [
-      {
-        short: true,
-        title: `repository`,
-        value: `<${repo_url}|${owner}/${repo}>`
-      },
-      {short: true, title: `ref`, value: `${ref}`},
-      {short: true, title: `event name`, value: `${eventName}`},
-      {short: true, title: `workflow`, value: `<${action_url}|${workflow}>`}
-    ];
-
-    return fields;
+    super(url, {username, icon_emoji});
   }
 
   /**
@@ -55,22 +30,32 @@ export class Slack extends IncomingWebhook {
     username: string,
     icon_emoji: string
   ): IncomingWebhookSendArguments {
-    const text: string = `${Slack.mark[status]} GitHub Actions ${Slack.msg[status]}`;
-    const attachments: Object = {
-      color: Slack.color[status],
-      title: msg,
-      fields: this.fields
-    };
+    const tag = this.getTag();
+    let text = `${msg} (release ${tag})`;
+
+    if (status !== Status.Success) {
+      text = `(!) Failed: ${text}`
+    }
+
     const payload: IncomingWebhookSendArguments = {
       text,
       username,
       icon_emoji,
-      attachments: [attachments]
     };
 
     core.debug(`Generated payload for Mattermost: ${JSON.stringify(payload)}`);
 
     return payload;
+  }
+
+  protected getTag(): string {
+    const ref = github.context.ref;
+
+    if(!ref.startsWith("refs/tags/")) {
+      return '';
+    }
+
+    return ref.replace(/^refs\/tags\//, "");
   }
 
   /**
@@ -79,17 +64,25 @@ export class Slack extends IncomingWebhook {
   public async notify(
     status: Status,
     msg: string,
+    channels: string[],
     username: string,
     icon_emoji: string
-  ): Promise<IncomingWebhookResult> {
+  ): Promise<IncomingWebhookResult[]> {
     try {
       const payload: IncomingWebhookSendArguments = this.generatePayload(
         status,
         msg,
         username,
-        icon_emoji
+        icon_emoji,
       );
-      const result = await this.send(payload);
+
+      let result: IncomingWebhookResult[] = []
+      for (const ch of channels) {
+        result.push(await this.send({
+          ...payload,
+          channel: ch
+        }));
+      }
 
       core.debug('Sent message to Mattermost');
 
