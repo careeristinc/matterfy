@@ -13,11 +13,7 @@ export class Mattermost extends IncomingWebhook {
   static readonly mark: string[] = [':x:', ':white_check_mark:', ':warning:'];
   static readonly msg: string[] = ['Failure', 'Success', 'Cancel'];
 
-  constructor(
-    url: string,
-    username: string,
-    icon_emoji: string,
-  ) {
+  constructor(url: string, username: string, icon_emoji: string) {
     super(url, {username, icon_emoji});
   }
 
@@ -34,13 +30,13 @@ export class Mattermost extends IncomingWebhook {
     let text = `${msg} (release ${tag})`;
 
     if (status !== Status.Success) {
-      text = `(!) Failed: ${text}`
+      text = `(!) Failed: ${text}`;
     }
 
     const payload: IncomingWebhookSendArguments = {
       text,
       username,
-      icon_emoji,
+      icon_emoji
     };
 
     core.debug(`Generated payload for Mattermost: ${JSON.stringify(payload)}`);
@@ -51,11 +47,11 @@ export class Mattermost extends IncomingWebhook {
   protected getTag(): string {
     const ref = github.context.ref;
 
-    if(!ref.startsWith("refs/tags/")) {
+    if (!ref.startsWith('refs/tags/')) {
       return '';
     }
 
-    return ref.replace(/^refs\/tags\//, "");
+    return ref.replace(/^refs\/tags\//, '');
   }
 
   /**
@@ -73,15 +69,17 @@ export class Mattermost extends IncomingWebhook {
         status,
         msg,
         username,
-        icon_emoji,
+        icon_emoji
       );
 
-      let result: IncomingWebhookResult[] = []
+      let result: IncomingWebhookResult[] = [];
       for (const ch of channels) {
-        result.push(await this.send({
-          ...payload,
-          channel: ch
-        }));
+        result.push(
+          await this.send({
+            ...payload,
+            channel: ch
+          })
+        );
       }
 
       core.debug('Sent message to Mattermost');

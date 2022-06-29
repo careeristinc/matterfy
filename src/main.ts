@@ -21,7 +21,7 @@ async function run() {
 
     const status: Status = getStatus(type);
     const mm = new Mattermost(url, username, icon_emoji);
-    const channels: string[] = JSON.parse(channelsRaw)
+    const channels: string[] = JSON.parse(channelsRaw);
 
     const result = await mm.notify(status, msg, channels, username, icon_emoji);
     core.debug(`Response from Slack: ${JSON.stringify(result)}`);
