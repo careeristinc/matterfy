@@ -36,7 +36,11 @@ export class Mattermost extends IncomingWebhook {
     if (this.show_ref) {
       const tag = this.getTag();
       if (tag) {
-        text += ` (release ${tag})`;
+        if (text.includes('${tag}')) {
+          text = text.replace('${tag}', tag);
+        } else {
+          text += ` (release ${tag})`;
+        }
       } else {
         text += ` (branch ${this.getBranch()})`;
       }
