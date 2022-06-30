@@ -5,8 +5,7 @@ import {Status, getStatus} from './utils';
 async function run() {
   try {
     const type: string = core.getInput('type', {required: true});
-    const msg: string =
-      core.getInput('msg', {trimWhitespace: false}) || 'Default message';
+    const msg: string = core.getInput('msg') || 'Default message';
     const show_ref: boolean = core.getBooleanInput('show_ref') || false;
     const username: string = core.getInput('username') || 'Github Actions';
     const icon_emoji: string = core.getInput('icon_emoji') || 'octocat';

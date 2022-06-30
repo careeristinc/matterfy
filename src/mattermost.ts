@@ -98,7 +98,7 @@ export class Mattermost extends IncomingWebhook {
         username,
         icon_emoji
       );
-
+      core.debug(`Custom message: ${payload.text}`);
       let result: IncomingWebhookResult[] = [];
       for (const ch of channels) {
         result.push(
