@@ -23,6 +23,7 @@ async function run() {
     const status: Status = getStatus(type);
     const mm = new Mattermost(url, username, icon_emoji, show_ref);
     const msg = msgRaw.join('\n');
+    core.debug(`Custom message: ${msg}`);
     const channels: string[] = JSON.parse(channelsRaw);
 
     const result = await mm.notify(status, msg, channels, username, icon_emoji);
